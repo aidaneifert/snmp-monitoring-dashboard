@@ -22,9 +22,46 @@ class DashboardSNMP:
             raw_uptime= str(value_object)
             return raw_uptime
 
-    def get_cpu_usage(self, server_ip, server_port= 161):        # Universal OID= 1.3.6.1.2.1.25.3.3.1.2
-        pass
-
+    async def get_cpu_usage(self, server_ip, server_port= 161):        # Universal OID= 1.3.6.1.2.1.25.3.3.1.2
+        error_indication, error_status, error_index, var_binds= await get_cmd(
+            SnmpEngine(),
+            CommunityData('public'),
+            await UdpTransportTarget.create((server_ip, server_port)),
+            ContextData(),
+            ObjectType(ObjectIdentity('.1.3.6.1.4.1.2021.10.1.3.1'))
+            )
+        
+        if error_indication:
+            return error_indication
+        elif error_status:
+            return error_status
+        elif error_status:
+            return error_index
+        elif var_binds:
+            value_object= var_binds[0][1]
+            raw_cpu_usage= str(value_object)
+            return raw_cpu_usage
+        
+    async def get_cpu_cores(self, server_ip, server_port= 161):         # Universal OID= 1.3.6.1.2.1.25.3.3.1.2
+        cores= 0
+        error_indication, error_status, error_index, var_binds= await get_cmd(
+            SnmpEngine(),
+            CommunityData('public'),
+            await UdpTransportTarget.create((server_ip, server_port)),
+            ContextData(),
+            ObjectType(ObjectIdentity('.1.3.6.1.2.1.25.3.3.1')),
+            lexicographicMode=False
+            )        
+        if error_indication:
+            return error_indication
+        elif error_status:
+            return error_status
+        elif error_status:
+            return error_index
+        elif var_binds:
+            core_count= cores + 1
+            return core_count
+                
     def get_ram_usage(self, server_ip, server_port= 161):        # Universal OID TOTAL RAM= 1.3.6.1.2.1.25.2.2.0
         pass
         #need to walk the table and subtract storage used from total storage

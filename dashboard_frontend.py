@@ -45,7 +45,7 @@ class UserInterface:
             up_time= ctk.CTkLabel(frame, text= self.backend.system_uptime(frame_name))
             up_time.grid(padx=5, pady=1)
 
-            cpu_usage= ctk.CTkLabel(frame, text= "")
+            cpu_usage= ctk.CTkLabel(frame, text= self.backend.system_cpu_usage(frame_name))
             cpu_usage.grid(padx=5, pady=1)
 
             ram_usage= ctk.CTkLabel(frame, text= "")

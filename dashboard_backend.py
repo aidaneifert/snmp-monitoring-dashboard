@@ -47,10 +47,22 @@ class DashboardBackend():
     #this works on the assumption that a month is 30 days always, eventually will add realtime month adjustment for 
     #more acurate uptime. 
         
-    def system_cpu_usage(self):
-        self.snmp.get_cpu_usage()
-        return
+    def system_cpu_usage(self, system_id):
+        try:
+            ip_addr, port= self.get_device_config(system_id= system_id)
+            snmp_cpu_usage= asyncio.run(self.snmp.get_cpu_usage(ip_addr, server_port= port))
+            snmp_cpu_cores= asyncio.run(self.snmp.get_cpu_usage(ip_addr, server_port= port))
+           
+        except ValueError:
+            ip_addr= self.get_device_config(system_id= system_id)
+            snmp_cpu_usage= asyncio.run(self.snmp.get_cpu_usage(ip_addr))
+            snmp_cpu_cores= asyncio.run(self.snmp.get_cpu_usage(ip_addr))
+
+        cpu_usage_precentage= float(snmp_cpu_usage) / float(snmp_cpu_cores)
+        
+        return snmp_cpu_usage, snmp_cpu_cores
     
+
     def system_ram_usage(self):
         self.snmp.get_ram_usage()
         return
@@ -67,8 +79,8 @@ class DashboardBackend():
         self.snmp.get_network_up_speed()
         return
 
-
+#this is test/ debug code. 
 if __name__ == "__main__":
     DBBE= DashboardBackend()
-    value= DBBE.system_uptime("server 1")
+    value= DBBE.system_cpu_usage("server 1")
     print(value)
