@@ -1,4 +1,91 @@
-Vendor:
+#Has support for Microsoft, Cisco, HP, Juniper, Dell, VMWare, Net-SNMP, and Ubiquiti. 0 is for fallback OID's.
+#will default to ?net-snmp? if the system-oid's PEN is not supported.
+# Vendor:
+#   uptime:
+#   cpu_usage: 
+#   cpu_cores:
+#   ram_usage: 
+#   disk_usage: 
+#   network_download:
+#   network_upload:
+
+Microsoft:
   uptime:
   cpu_usage: 
-  
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload: 
+
+Cisco:
+  uptime:
+  cpu_usage: 
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload:   
+
+HP:
+  uptime:
+  cpu_usage: 
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload:  
+
+Juniper: 
+  uptime:
+  cpu_usage: 
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload:  
+
+Dell:
+  uptime:
+  cpu_usage: 
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload:  
+
+VMWare: 
+  uptime:
+  cpu_usage: 
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload:  
+
+Net-SNMP:
+  uptime: "1.3.6.1.2.1.25.1.1.0"
+  cpu_usage: ".1.3.6.1.4.1.2021.10.1.3.1"
+  cpu_cores: ".1.3.6.1.2.1.25.3.3.1"
+  ram_usage: "test Net-SNMP"
+  disk_usage: "test Net-SNMP"
+  network_download: "test Net-SNMP"
+  network_upload: "test Net-SNMP" 
+
+Ubiquiti:
+  uptime:
+  cpu_usage: 
+  cpu_cores:
+  ram_usage: 
+  disk_usage: 
+  network_download:
+  network_upload:  
+
+"0":
+  uptime: "test 0"
+  cpu_usage: "test 0"
+  cpu_cores: "test 0"
+  ram_usage: "test 0"
+  disk_usage: "test 0"
+  network_download: "test 0"
+  network_upload: "test 0"  

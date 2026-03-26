@@ -1,4 +1,3 @@
-import asyncio
 import customtkinter as ctk
 from dashboard_conf import DashboardConfig
 from dashboard_backend import DashboardBackend

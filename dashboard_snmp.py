@@ -2,13 +2,34 @@ import asyncio
 from pysnmp.hlapi.v3arch.asyncio import *
 
 class DashboardSNMP:
-    async def get_uptime(self, server_ip, server_port= 161):       # Universal OID= 1.3.6.1.2.1.25.1.1.0
+    async def get_system_info(self, server_ip, server_port= 161):
         error_indication, error_status, error_index, var_binds= await get_cmd(
             SnmpEngine(),
             CommunityData('public'),
             await UdpTransportTarget.create((server_ip, server_port)),
             ContextData(),
-            ObjectType(ObjectIdentity('1.3.6.1.2.1.25.1.1.0'))
+            ObjectType(ObjectIdentity('1.3.6.1.2.1.1.2.0'))
+            )
+        
+        if error_indication:
+            return error_indication
+        elif error_status:
+            return error_status
+        elif error_status:
+            return error_index
+        elif var_binds:
+            value_object= var_binds[0][1]
+            sys_object_id= str(value_object)
+            return sys_object_id
+                
+    async def get_uptime(self, oid, server_ip, server_port= 161):
+        print(oid)
+        error_indication, error_status, error_index, var_binds= await get_cmd(
+            SnmpEngine(),
+            CommunityData('public'),
+            await UdpTransportTarget.create((server_ip, server_port)),
+            ContextData(),
+            ObjectType(ObjectIdentity(oid))
             )
         
         if error_indication:
@@ -22,13 +43,14 @@ class DashboardSNMP:
             raw_uptime= str(value_object)
             return raw_uptime
 
-    async def get_cpu_usage(self, server_ip, server_port= 161):        # Universal OID= 1.3.6.1.2.1.25.3.3.1.2
+    async def get_cpu_usage(self, oid, server_ip, server_port= 161):
+        print(oid)
         error_indication, error_status, error_index, var_binds= await get_cmd(
             SnmpEngine(),
             CommunityData('public'),
             await UdpTransportTarget.create((server_ip, server_port)),
             ContextData(),
-            ObjectType(ObjectIdentity('.1.3.6.1.4.1.2021.10.1.3.1'))
+            ObjectType(ObjectIdentity(oid))
             )
         
         if error_indication:
@@ -39,41 +61,43 @@ class DashboardSNMP:
             return error_index
         elif var_binds:
             value_object= var_binds[0][1]
-            raw_cpu_usage= str(value_object)
-            return raw_cpu_usage
+            return value_object
         
-    async def get_cpu_cores(self, server_ip, server_port= 161):         # Universal OID= 1.3.6.1.2.1.25.3.3.1.2
+    async def get_cpu_cores(self, oid, server_ip, server_port= 161):
         cores= 0
-        error_indication, error_status, error_index, var_binds= await get_cmd(
+        generator= next_cmd(
             SnmpEngine(),
             CommunityData('public'),
             await UdpTransportTarget.create((server_ip, server_port)),
             ContextData(),
-            ObjectType(ObjectIdentity('.1.3.6.1.2.1.25.3.3.1')),
+            ObjectType(ObjectIdentity(oid)),
             lexicographicMode=False
             )        
-        if error_indication:
-            return error_indication
-        elif error_status:
-            return error_status
-        elif error_status:
-            return error_index
-        elif var_binds:
-            core_count= cores + 1
-            return core_count
-                
-    def get_ram_usage(self, server_ip, server_port= 161):        # Universal OID TOTAL RAM= 1.3.6.1.2.1.25.2.2.0
+        async for error_indication, error_status, error_index, var_binds in generator:
+            if error_indication:
+                return error_indication
+            elif error_status:
+                return error_status
+            elif error_status:
+                return error_index
+            elif var_binds:
+                core_count= cores + 1
+        print (core_count)
+        return core_count
+        
+    def get_ram_usage(self, server_ip, server_port= 161):
         pass
         #need to walk the table and subtract storage used from total storage
 
-    def get_disk_usage(self, server_ip, server_port= 161):       # Universal IOD for disk table= 1.3.6.1.2.1.25.2.3.1
+    def get_disk_usage(self, server_ip, server_port= 161):
         pass
         #need to walk the table and subtract storage used from total storage
 
-    def get_network_down_speed(self, server_ip, server_port= 161):       # Universal IOD= 1.3.6.1.2.1.31.1.1.1.6
+    def get_network_down_speed(self, server_ip, server_port= 161):
         pass
         #need to take a a counter and b counter and calculate the speed over time. 
 
-    def get_network_up_speed(self, server_ip, server_port= 161):      # Universal IOD= 1.3.6.1.2.1.31.1.1.1.10
+    def get_network_up_speed(self, server_ip, server_port= 161):
         pass
         #need to take a a counter and b counter and calculate the speed over time. 
+
