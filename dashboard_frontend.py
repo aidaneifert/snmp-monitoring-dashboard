@@ -47,18 +47,15 @@ class UserInterface:
             cpu_usage= ctk.CTkLabel(frame, text= self.backend.system_cpu_usage(frame_name))
             cpu_usage.grid(padx=5, pady=1)
 
-            ram_usage= ctk.CTkLabel(frame, text= "")
+            ram_usage= ctk.CTkLabel(frame, text= self.backend.system_ram_usage(frame_name))
             ram_usage.grid(padx=5, pady=1)
 
-            disk_usage= ctk.CTkLabel(frame, text= "")
+            disk_usage= ctk.CTkLabel(frame, text= self.backend.system_disk_usage(frame_name))
             disk_usage.grid(padx=5, pady=1)
 
-            network_downlink_speed= ctk.CTkLabel(frame, text= "")
-            network_downlink_speed.grid(padx=5, pady=1)
+            network_usage= ctk.CTkLabel(frame, text= "")
+            network_usage.grid(padx=5, pady=1)
 
-            network_uplink_speed= ctk.CTkLabel(frame, text= "")
-            network_uplink_speed.grid(padx=5, pady=1)
-    
     def start_window(self):
         self.main_window.title(self.window_name)
         window_width, window_height= self.size_window()
