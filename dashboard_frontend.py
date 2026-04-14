@@ -1,13 +1,14 @@
 import customtkinter as ctk
-from dashboard_conf import DashboardConfig
 from dashboard_backend import DashboardBackend
+
+# get window to stay where it left off/ where it was closed 
+# make it so that frames/tiles cannot outgrow the main window 
+#make it so frame size and widget size is standardized, currently they size differently;
+#for different length values making the frames inconsistant. 
 
 class UserInterface:
     def __init__(self):
-        self.config= DashboardConfig()
         self.backend= DashboardBackend()
-
-        self.devices= self.config.read_dashboard_config()
         self.main_window= ctk.CTk()
         self.window_name= "Dashboard"
         self.ui_frames= {}
@@ -29,32 +30,57 @@ class UserInterface:
         return window_placement
     
     def make_frames(self):
-        for device, items in self.devices.items():
-            device_name= str(device)
+        device_list= self.backend.get_device_names()
 
-            self.ui_frames[device_name]= ctk.CTkFrame(master=self.main_window, corner_radius=10)
-            self.ui_frames[device_name].grid(padx=10, pady=10)
+        for name in device_list:
+            self.ui_frames[name]= ctk.CTkFrame(master=self.main_window, corner_radius=10)
+            self.ui_frames[name].grid(padx=10, pady=10)
 
-            system_name= ctk.CTkLabel(master= self.ui_frames[device_name], text= items['name'])
+            system_name= ctk.CTkLabel(master= self.ui_frames[name], text= name)
             system_name.grid(padx=5, pady=5)
 
     def make_widgets(self):
-        for frame_name, frame in self.ui_frames.items():
+        for name, frame in self.ui_frames.items():
+            try:
+                ip, port= self.backend.get_device_config(name)
+                vendor_OIDs= self.backend.get_vendor_oid(ip, port)
+
+                up_time= ctk.CTkLabel(frame, text= self.backend.system_uptime(vendor_OIDs, ip, port))
+                up_time.grid(padx=5, pady=1)
+
+                cpu_usage= ctk.CTkLabel(frame, text= self.backend.system_cpu_usage(vendor_OIDs, ip, port))
+                cpu_usage.grid(padx=5, pady=1)
+
+                ram_usage= ctk.CTkLabel(frame, text= self.backend.system_ram_usage(vendor_OIDs, ip, port))
+                ram_usage.grid(padx=5, pady=1)
+
+                disk_usage= ctk.CTkLabel(frame, text= self.backend.system_disk_usage(vendor_OIDs, ip, port))
+                disk_usage.grid(padx=5, pady=1)
+
+                network_usage= ctk.CTkLabel(frame, text= "")
+                network_usage.grid(padx=5, pady=1)
+
+            except ValueError: 
+                ip= self.backend.get_device_config(name)
+                vendor_OIDs= self.backend.get_vendor_oid(ip)
+
+                up_time= ctk.CTkLabel(frame, text= self.backend.system_uptime(vendor_OIDs, ip))
+                up_time.grid(padx=5, pady=1)
+
+                cpu_usage= ctk.CTkLabel(frame, text= self.backend.system_cpu_usage(vendor_OIDs, ip))
+                cpu_usage.grid(padx=5, pady=1)
+
+                ram_usage= ctk.CTkLabel(frame, text= self.backend.system_ram_usage(vendor_OIDs, ip))
+                ram_usage.grid(padx=5, pady=1)
+
+                disk_usage= ctk.CTkLabel(frame, text= self.backend.system_disk_usage(vendor_OIDs, ip))
+                disk_usage.grid(padx=5, pady=1)
+
+                network_usage= ctk.CTkLabel(frame, text= "")
+                network_usage.grid(padx=5, pady=1)
+                ip = self.backend.get_device_config(name)
             
-            up_time= ctk.CTkLabel(frame, text= self.backend.system_uptime(frame_name))
-            up_time.grid(padx=5, pady=1)
 
-            cpu_usage= ctk.CTkLabel(frame, text= self.backend.system_cpu_usage(frame_name))
-            cpu_usage.grid(padx=5, pady=1)
-
-            ram_usage= ctk.CTkLabel(frame, text= self.backend.system_ram_usage(frame_name))
-            ram_usage.grid(padx=5, pady=1)
-
-            disk_usage= ctk.CTkLabel(frame, text= self.backend.system_disk_usage(frame_name))
-            disk_usage.grid(padx=5, pady=1)
-
-            network_usage= ctk.CTkLabel(frame, text= "")
-            network_usage.grid(padx=5, pady=1)
 
     def start_window(self):
         self.main_window.title(self.window_name)
@@ -69,7 +95,4 @@ if __name__ == "__main__":
     ui = UserInterface()
     ui.start_window()
 
-# get window to stay where it left off/ where it was closed 
-# make it so that frames/tiles cannot outgrow the main window 
-#make it so frame size and widget size is standardized, currently they size differently;
-#for different length values making the frames inconsistant. 
+ 
