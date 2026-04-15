@@ -25,11 +25,9 @@ class DashboardBackend():
             return ip_addr, port
         
         except KeyError:
-            print(ip_addr)
             return ip_addr
         
     def get_vendor_oid(self, ip, port= 161):
-        print(ip, port)
         system_info= asyncio.run(self.snmp.get_system_info(ip, port))
         oid= system_info.strip(".").split(".")
         private_enterprise_number= oid[6]
@@ -107,12 +105,17 @@ class DashboardBackend():
         storage_used_OID= vendor_OIDs["storage_used"]
         sector_size_OID= vendor_OIDs["storage_sector_size"]
 
-        disk_idx_list= asyncio.run(self.snmp.get_disk_index(storage_description_OID, ip, port))
-        sector_size= asyncio.run(self.snmp.get_disk_sector_size(sector_size_OID, disk_idx_list, ip, port))
-        storage_used= asyncio.run(self.snmp.get_disk_usage(storage_used_OID, disk_idx_list, ip, port))
-        total_storage= asyncio.run(self.snmp.get_disk_total_capacity(storage_size_OID, disk_idx_list, ip, port))
-    
-        return
+        disk_info= asyncio.run(self.snmp.get_disk_info(storage_description_OID, ip, port))
+
+        # sector_size= asyncio.run(self.snmp.get_disk_sector_size(sector_size_OID, disk_idx_list, ip, port))
+
+        storage_used= asyncio.run(self.snmp.get_disk_usage(storage_used_OID, disk_info, ip, port))
+        total_storage= asyncio.run(self.snmp.get_disk_total_capacity(storage_size_OID, disk_info, ip, port))
+
+        usage_precentage= (storage_used / total_storage) * 100
+        total= total_storage / 100000000
+        used= storage_used / 1000000000
+        return f"{int(used)} / {int(total)} | {int(usage_precentage)}%" 
    
     def system_network_usage(self):
         self.snmp.get_network_down_speed()

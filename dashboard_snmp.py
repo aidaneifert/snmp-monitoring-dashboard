@@ -141,8 +141,10 @@ class DashboardSNMP:
                 total_memory += int(value)
         return total_memory
 
-    async def get_disk_index(self, disk_idx_OID, server_ip, server_port):
-        partition_index_list = []
+    async def get_disk_info(self, disk_idx_OID, server_ip, server_port):    #try to get rid of lists and pack everything directly into a dict 
+        idx_sector_dict= {}
+        partition_index_list= []
+        sector_size_list= []
 
         error_indication, error_status, error_index, var_binds = await bulk_cmd(
             SnmpEngine(),
@@ -161,39 +163,38 @@ class DashboardSNMP:
             for oid_val, value in var_binds:
                 val = str(value)
                 if val[0] == "/":
-                    idx= oid_val[-1]
-                    partition_index_list.append(idx)
+                    oid_split= str(oid_val).split(".")
+                    idx= oid_split[-1]
+                    partition_index_list.append(int(idx))
 
-        return partition_index_list
+                match str(value):
+                    case "128":
+                        sector_size_list.append(int(value))
+                    case "256":
+                        sector_size_list.append(int(value))
+                    case "512":
+                        sector_size_list.append(int(value))
+                    case "520":
+                        sector_size_list.append(int(value))
+                    case "528":
+                        sector_size_list.append(int(value))
+                    case "1024":
+                        sector_size_list.append(int(value))
+                    case "2048":
+                        sector_size_list.append(int(value))
+                    case "4096":
+                        sector_size_list.append(int(value))
+                    case "4112":
+                        sector_size_list.append(int(value))
+                    case "4160":
+                        sector_size_list.append(int(value))
+                    
+        return dict(zip(partition_index_list, sector_size_list))
 
-    async def get_disk_sector_size(self, sector_size_OID, disk_idx_list, server_ip, server_port):
-        sector_size_list= []
-
-        for idx in disk_idx_list:
-            oid_with_idx= sector_size_OID + "." + str(idx)
-            error_indication, error_status, error_index, var_binds= await get_cmd(
-                SnmpEngine(),
-                CommunityData('public'),
-                await UdpTransportTarget.create((server_ip, server_port)),
-                ContextData(),
-                ObjectType(ObjectIdentity(oid_with_idx))
-                )
-    
-            if error_indication:
-                return
-            elif error_status:
-                return
-            elif int(var_binds[0][1]) != 0:                             #this is very wrong i just dont know why
-                sector_size_list.append(var_binds[0][1]) 
-            else: 
-                pass
-
-        return sector_size_list
-
-    async def get_disk_usage(self, storage_used_OID, disk_idx_list, server_ip, server_port):
+    async def get_disk_usage(self, storage_used_OID, disk_info, server_ip, server_port):
         used_storage= 0
-        
-        for idx in disk_idx_list:
+  
+        for idx, sector_size in disk_info.items():
             oid_with_idx= storage_used_OID + "." + str(idx)
             error_indication, error_status, error_index, var_binds= await get_cmd(
                 SnmpEngine(),
@@ -209,14 +210,15 @@ class DashboardSNMP:
                 return
             else:
                 value= var_binds[0][1]
-                used_storage += int(value)
+                total = int(value) * int(sector_size)
+                used_storage += total
 
         return used_storage
 
-    async def get_disk_total_capacity(self, storage_total_OID, disk_idx_list, server_ip, server_port):
+    async def get_disk_total_capacity(self, storage_total_OID, disk_info, server_ip, server_port):
         total_storage= 0
 
-        for idx in disk_idx_list:
+        for idx, sector_size in disk_info.items():
             oid_with_idx= storage_total_OID + "." + str(idx)
             error_indication, error_status, error_index, var_binds= await get_cmd(
                 SnmpEngine(),
@@ -232,8 +234,9 @@ class DashboardSNMP:
                 return
             else:
                 value= var_binds[0][1]
-                total_storage += int(value)
-                
+                total = int(value) * int(sector_size)
+                total_storage += total
+        
         return total_storage
 
     # async def get_network_down_speed(self, server_ip, server_port= 161):
@@ -244,3 +247,6 @@ class DashboardSNMP:
     #     pass
     #     #need to take a a counter and b counter and calculate the speed over time. 
 
+if __name__ == "__main__":
+    temp_obj= DashboardSNMP()
+    info= asyncio.run(temp_obj.get_disk_info("1.3.6.1.2.1.25.2.3.1.3", "192.168.10.10", 161))

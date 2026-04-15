@@ -80,8 +80,6 @@ class UserInterface:
                 network_usage.grid(padx=5, pady=1)
                 ip = self.backend.get_device_config(name)
             
-
-
     def start_window(self):
         self.main_window.title(self.window_name)
         window_width, window_height= self.size_window()
