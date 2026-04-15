@@ -1,0 +1,5 @@
+##CONFIG FORMAT##
+
+#server/network device name:
+# ip_address: "server ip address"
+# port: "server snmp ports" (if not default 161, 162)
